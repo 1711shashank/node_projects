@@ -2,7 +2,11 @@ const url = "https://github.com/topics";
 
 const request = require("request");
 const cheerio = require("cheerio");
+const fs = require("fs");
+const path = require("path");
 const getReposPage = require("./reposPage");
+
+createDir( path.join(__dirname,"topics"));
 
 request(url,cb);
 function cb(err, response, html) {
@@ -24,7 +28,15 @@ function extractLink(html){
         let topic = link.split('/')[2];
         link = `https://github.com/${link}`;
         // console.log(link);
-        getReposPage(link,topic);
+        getReposPage(topic,link);
+        console.log(`Issue file created for topic ${topic}`); 
     }
+    
 
+}
+
+function createDir(filePath){
+    if(fs.existsSync(filePath) == false){
+        fs.mkdirSync(filePath);
+    }   
 }
