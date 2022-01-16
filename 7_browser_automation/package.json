@@ -1,5 +1,5 @@
 {
-  "name": "2_file_organizer",
+  "name": "7_browser_automation",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bin":{
-    "peppy": "main.js"
+  "dependencies": {
+    "puppeteer": "^13.0.1"
   }
 }

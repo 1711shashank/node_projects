@@ -13,5 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "devDependencies": {},
+  "description": "",
+  "bin": {
+    "shashank": "hwt.js"
+  }
 }
