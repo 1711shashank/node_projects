@@ -4,14 +4,10 @@ let codeObj = require("./codes.js");
 
 let url = "https://www.hackerrank.com/auth/login";
 
-
-// console.log("Before");
-let browserOpenPromise = puppeteer.launch({
-    headless:false,
-    defaultViewport:null,
-    args:["--start-maximized"]
-});
+// Scenario with Promise chaining
 let page;
+let browserOpenPromise = puppeteer.launch({ headless:false, defaultViewport:null, args:["--start-maximized"] });
+
 browserOpenPromise
     .then(function(browser){
         let pageArrPromise = browser.pages();
