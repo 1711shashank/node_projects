@@ -1,13 +1,70 @@
 const fs = require('fs');
 const path = require("path");
 const pdfkit = require("pdfkit");
+const { Image } = require('image-js');
 
 
-let photosPath = path.join(__dirname,'photos');
-let imageArr = readPhotosFn(photosPath);
-createPdfFn();
+(async function pdfMaker(){
+   try{
+      let photosPath = path.join(__dirname,'photos');
+      let imageArr = await readPhotosFn(photosPath);
+
+      await createPdfFn(imageArr);
+
+   }
+   catch(err){
+      console.log(err);
+   }
+   
+})()
 
 
+async function createPdfFn(imageArr){
+   
+   let pdfPath = path.join(__dirname, "photos"+".pdf");
+   let pdf = new pdfkit();
+   pdf.pipe(fs.createWriteStream(pdfPath));
+
+   for(let i=0;i<imageArr.length;i++){
+      let testImage = imageArr[i];
+      let orientation = await findImageOrientationFn(testImage);
+      // console.log(orientation);
+
+      if(i == 0){
+         if(orientation == 'portrait'){
+            pdf.image(testImage, {fit: [700,600]});
+         }
+         else{
+            pdf.image(testImage, {fit: [400,400]});
+         }
+      } else {
+         if(orientation == 'portrait'){
+            pdf.addPage().image(testImage, {fit: [700,600]});
+         }
+         else{
+            pdf.addPage().image(testImage, 110,60, {fit: [400,400]});
+         }
+      }
+   }
+
+   pdf.end();
+}
+
+async function findImageOrientationFn(img) {
+   try{
+      let pic = await Image.load(img);
+      let orientation = await cb(pic);
+      function cb(img){
+         if(img.width > img.height) return 'landscape';
+         else if(img.width < img.height) return'portrait';
+         else return 'even';
+      }
+      return orientation;
+   }
+   catch(err){
+      console.log(err);
+   }
+}
 
 function readPhotosFn(dirPath){
    let photosArr = [];
@@ -24,38 +81,11 @@ function readPhotosFn(dirPath){
    }
    return photosArr;
 }
+
 function checkForPhotoFn(fileAddres){
    let ext = path.extname(fileAddres);
    ext = ext.slice(1);
-   if(ext == 'jpg' || ext == 'png') return true;
+   if(ext == 'jpg' || ext == 'png' || ext == 'jpeg') return true;
    else return false;
 }
 
-function createPdfFn(){
-   
-   let pdfPath = path.join(__dirname, "photos"+".pdf");
-
-   let pdf = new pdfkit();
-   pdf.pipe(fs.createWriteStream(pdfPath));
-
-   // let imageArr = ["./image1.jpg"];
-
-   pdf.image(imageArr[0], 50, 50, {fit: [500, 500]}) // add page in not needed for the 1st image
-   for(let i=1;i<imageArr.length;i++){
-      pdf.addPage().image(imageArr[i], 50, 50, {fit: [500, 500]})
-   }
-
-   pdf.end();
-
-}
-
-
-
-
-
-
-
-
-
-// inside for loop
-// pdf.addPage().image(imageArr[i], 50, 50, {cover: [pdf.page.width - 100, pdf.page.height - 300], fit: [300, 300]})
