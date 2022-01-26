@@ -3,7 +3,7 @@ const path = require("path");
 const pdfkit = require("pdfkit");
 const { Image } = require('image-js');
 
-
+//self calling function
 (async function pdfMaker(){
    try{
       let photosPath = path.join(__dirname,'photos');
@@ -15,46 +15,59 @@ const { Image } = require('image-js');
    catch(err){
       console.log(err);
    }
-   
+
 })()
 
 
+// This function create the PDF file
 async function createPdfFn(imageArr){
    
-   let pdfPath = path.join(__dirname, "photos"+".pdf");
-   let pdf = new pdfkit();
-   pdf.pipe(fs.createWriteStream(pdfPath));
+   let pdfPath = path.join(__dirname, "photos"+".pdf");  // location to save the pdf
+   let pdf = new pdfkit();                               // pdf object
+   pdf.pipe(fs.createWriteStream(pdfPath));              
 
    for(let i=0;i<imageArr.length;i++){
-      let testImage = imageArr[i];
-      let orientation = await findImageOrientationFn(testImage);
-      // console.log(orientation);
+      let img = "./photos/" + imageArr[i];
+      let orientation = await findImageOrientationFn(img);     // landscape or portrait
 
+      // addPage() is not needed for the 1st image as its allready been created
       if(i == 0){
+
+         // pdf.image(img, (orientation == 'portrait') ? {fit: [650,650]} : {fit: [400,400]} );
+         // OR
+         
          if(orientation == 'portrait'){
-            pdf.image(testImage, {fit: [700,600]});
+            pdf.image(img, {fit: [650,650]});
          }
          else{
-            pdf.image(testImage, {fit: [400,400]});
+            pdf.image(img, {fit: [400,400]});
          }
-      } else {
+      } 
+      else {
          if(orientation == 'portrait'){
-            pdf.addPage().image(testImage, {fit: [700,600]});
+            pdf.addPage().image(img, {fit: [650,650]});
          }
          else{
-            pdf.addPage().image(testImage, 110,60, {fit: [400,400]});
+            pdf.addPage().image(img, 110,60, {fit: [400,400]});
          }
       }
+
+      console.log("Image added in the PDF is :", imageArr[i] );
    }
+   console.log("~~~~~~~~~~~~~~~~~~~~~~~");
+   console.log("PDF created sucessfully");
+   console.log("~~~~~~~~~~~~~~~~~~~~~~~");
 
    pdf.end();
 }
 
+
+//This fuunction find the Orientation of the image
 async function findImageOrientationFn(img) {
    try{
-      let pic = await Image.load(img);
-      let orientation = await cb(pic);
-      function cb(img){
+      let pic = await Image.load(img); 
+      let orientation = await imageOrientationFn(pic);
+      function imageOrientationFn(img){
          if(img.width > img.height) return 'landscape';
          else if(img.width < img.height) return'portrait';
          else return 'even';
@@ -66,6 +79,8 @@ async function findImageOrientationFn(img) {
    }
 }
 
+
+// This function insert all the image in an array of the given folder
 function readPhotosFn(dirPath){
    let photosArr = [];
    let fileNames = fs.readdirSync(dirPath);
@@ -75,13 +90,15 @@ function readPhotosFn(dirPath){
       if(isFile){
          let isPhoto = checkForPhotoFn(fileNames[i]);
          if(isPhoto){
-            photosArr.push("./photos/" + fileNames[i]);
+            photosArr.push(fileNames[i]);
          }
       }
    }
    return photosArr;
 }
 
+
+// This function check for the required file type (Photo)
 function checkForPhotoFn(fileAddres){
    let ext = path.extname(fileAddres);
    ext = ext.slice(1);
